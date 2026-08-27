@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Planificador Docente IA · DETP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- ===== Barra superior ===== -->
+  <header class="topbar">
+    <div class="seal" aria-hidden="true">
+      <div class="seal-ring">
+        <span>DETP</span>
+      </div>
+    </div>
+    <div class="topbar-text">
+      <p class="eyebrow">Educación Técnico Profesional</p>
+      <h1>Planificador de Actividad Diaria</h1>
+    </div>
+    <button class="btn btn-ghost" id="btnHistorial" type="button">Mis planificaciones</button>
+  </header>
+
+  <div class="layout">
+
+    <!-- ===== Stepper lateral ===== -->
+    <nav class="stepper" aria-label="Pasos del proceso">
+      <ol id="stepperList">
+        <li class="step active" data-step="1">
+          <span class="step-num">01</span>
+          <div><strong>Datos base</strong><small>Docente, módulo y RA</small></div>
+        </li>
+        <li class="step" data-step="2">
+          <span class="step-num">02</span>
+          <div><strong>La actividad</strong><small>Tipo, tiempo, fecha, enunciado</small></div>
+        </li>
+        <li class="step" data-step="3">
+          <span class="step-num">03</span>
+          <div><strong>Generar con IA</strong><small>Estrategia, contenidos, recursos</small></div>
+        </li>
+        <li class="step" data-step="4">
+          <span class="step-num">04</span>
+          <div><strong>Revisar y ajustar</strong><small>Edita lo que generó la IA</small></div>
+        </li>
+        <li class="step" data-step="5">
+          <span class="step-num">05</span>
+          <div><strong>Guardar y exportar</strong><small>Word, PDF o en pantalla</small></div>
+        </li>
+      </ol>
+    </nav>
+
+    <!-- ===== Panel principal ===== -->
+    <main class="panel">
+
+      <!-- PASO 1 -->
+      <section class="card step-view" id="view-1">
+        <h2>Datos base</h2>
+        <p class="hint">Estos datos vienen de la base de datos institucional.</p>
+
+        <div class="field">
+          <label for="selDocente">Docente</label>
+          <select id="selDocente"></select>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="txtInstitucion">Institución</label>
+            <input type="text" id="txtInstitucion" disabled placeholder="Se completa automáticamente">
+          </div>
+          <div class="field">
+            <label for="txtBachillerato">Bachillerato Técnico</label>
+            <input type="text" id="txtBachillerato" disabled placeholder="Se completa automáticamente">
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="selModulo">Módulo Formativo</label>
+          <select id="selModulo"><option value="">Selecciona un docente primero…</option></select>
+        </div>
+
+        <div class="field">
+          <label for="selRA">Resultado de Aprendizaje (RA)</label>
+          <select id="selRA"><option value="">Selecciona un módulo primero…</option></select>
+        </div>
+
+        <div class="actions-row">
+          <span></span>
+          <button class="btn btn-primary" id="btnPaso1Next" type="button">Continuar →</button>
+        </div>
+      </section>
+
+      <!-- PASO 2 -->
+      <section class="card step-view is-hidden" id="view-2">
+        <h2>La actividad</h2>
+        <p class="hint">Lo mínimo que tú decides. El resto lo redacta la IA en el siguiente paso.</p>
+
+        <div class="field-row">
+          <div class="field">
+            <label>Tipo</label>
+            <div class="segmented" id="tipoSegmented">
+              <button type="button" class="seg-btn active" data-tipo="Individual">Individual</button>
+              <button type="button" class="seg-btn" data-tipo="Por Equipo">Por Equipo</button>
+            </div>
+          </div>
+          <div class="field">
+            <label for="numTiempo">Tiempo estimado (minutos)</label>
+            <input type="number" id="numTiempo" value="50" min="5" step="5">
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="dateFecha">Fecha de realización</label>
+            <input type="date" id="dateFecha">
+          </div>
+          <div class="field">
+            <label for="txtValor">Valor (opcional)</label>
+            <input type="text" id="txtValor" placeholder="Ej: 10 pts, 5%">
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="txtEnunciado">Título / enunciado de la actividad</label>
+          <textarea id="txtEnunciado" rows="3" placeholder="Ej: Diseñar un diagrama de flujo para calcular el promedio de calificaciones de un estudiante, usando estructuras condicionales."></textarea>
+          <small class="field-help">Sé específico: la IA usa exactamente este texto para redactar el resto de la planificación.</small>
+        </div>
+
+        <div class="actions-row">
+          <button class="btn btn-ghost" id="btnPaso2Back" type="button">← Atrás</button>
+          <button class="btn btn-primary" id="btnPaso2Next" type="button">Generar con IA →</button>
+        </div>
+      </section>
+
+      <!-- PASO 3: loading / generación -->
+      <section class="card step-view is-hidden" id="view-3">
+        <h2>Generando con IA</h2>
+        <div class="loading-block" id="loadingBlock">
+          <div class="spinner"></div>
+          <p id="loadingMsg">Analizando el enunciado y los contenidos del módulo…</p>
+        </div>
+        <div class="error-block is-hidden" id="errorBlock">
+          <p id="errorMsg"></p>
+          <button class="btn btn-primary" id="btnReintentar" type="button">Reintentar</button>
+        </div>
+      </section>
+
+      <!-- PASO 4: revisión -->
+      <section class="card step-view is-hidden" id="view-4">
+        <h2>Revisar y ajustar</h2>
+        <p class="hint">La IA propuso esto a partir de tu enunciado. Edita libremente antes de guardar.</p>
+
+        <div class="field">
+          <label for="edEstrategia">Estrategia</label>
+          <input type="text" id="edEstrategia">
+        </div>
+        <div class="field">
+          <label for="edIntencion">Intención educativa</label>
+          <textarea id="edIntencion" rows="2"></textarea>
+        </div>
+
+        <div class="momento-grid">
+          <div class="field">
+            <label for="edInicio">Inicio</label>
+            <textarea id="edInicio" rows="4"></textarea>
+          </div>
+          <div class="field">
+            <label for="edDesarrollo">Desarrollo</label>
+            <textarea id="edDesarrollo" rows="4"></textarea>
+          </div>
+          <div class="field">
+            <label for="edCierre">Cierre</label>
+            <textarea id="edCierre" rows="4"></textarea>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="edDiversidad">Atención a la diversidad</label>
+          <textarea id="edDiversidad" rows="2"></textarea>
+        </div>
+        <div class="field">
+          <label for="edRecursos">Recursos</label>
+          <textarea id="edRecursos" rows="2"></textarea>
+        </div>
+
+        <h3 class="subheading">Contenidos</h3>
+        <div class="momento-grid">
+          <div class="field">
+            <label for="edConceptuales">Conceptuales</label>
+            <textarea id="edConceptuales" rows="4"></textarea>
+          </div>
+          <div class="field">
+            <label for="edProcedimentales">Procedimentales</label>
+            <textarea id="edProcedimentales" rows="4"></textarea>
+          </div>
+          <div class="field">
+            <label for="edActitudinales">Actitudinales</label>
+            <textarea id="edActitudinales" rows="4"></textarea>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="selInstrumento">Instrumento de evaluación</label>
+          <select id="selInstrumento"></select>
+        </div>
+        <div class="field is-hidden" id="fieldInstrumentoOtro">
+          <label for="txtInstrumentoOtro">Especifica el instrumento</label>
+          <input type="text" id="txtInstrumentoOtro">
+        </div>
+
+        <div class="actions-row">
+          <button class="btn btn-ghost" id="btnPaso4Back" type="button">← Atrás</button>
+          <button class="btn btn-primary" id="btnPaso4Next" type="button">Continuar →</button>
+        </div>
+      </section>
+
+      <!-- PASO 5: guardar / exportar -->
+      <section class="card step-view is-hidden" id="view-5">
+        <h2>Guardar y exportar</h2>
+        <p class="hint">Guarda la planificación en la base de datos y descárgala en el formato que prefieras.</p>
+
+        <div class="save-block" id="saveBlock">
+          <button class="btn btn-primary btn-lg" id="btnGuardar" type="button">Guardar planificación</button>
+        </div>
+
+        <div class="export-block is-hidden" id="exportBlock">
+          <p class="success-msg">✓ Planificación guardada correctamente.</p>
+          <div class="export-grid">
+            <a class="btn btn-outline" id="linkDocx" target="_blank">⬇ Descargar Word (.docx)</a>
+            <a class="btn btn-outline" id="linkPdf" target="_blank">⬇ Descargar PDF</a>
+            <a class="btn btn-outline" id="linkVer" target="_blank">👁 Ver en pantalla</a>
+          </div>
+          <button class="btn btn-ghost" id="btnNueva" type="button">+ Nueva planificación</button>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- Modal historial -->
+<div class="modal-overlay is-hidden" id="modalHistorial">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Mis planificaciones</h3>
+      <button class="btn btn-ghost" id="btnCerrarHistorial" type="button">✕</button>
+    </div>
+    <div class="modal-body" id="historialBody">
+      <p class="hint">Cargando…</p>
+    </div>
+  </div>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
