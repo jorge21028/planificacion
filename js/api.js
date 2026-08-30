@@ -27,6 +27,9 @@ const Api = {
   guardarContenido: (payload) => Api._post('/api/contenidos_guardar.php', payload),
   eliminarContenido: (id) => Api._post('/api/contenidos_eliminar.php', { id }),
 
+  listarLogos: () => Api._get('/api/logos_listar.php'),
+  subirLogo: (tipo, imagenBase64) => Api._post('/api/logos_subir.php', { tipo, imagen_base64: imagenBase64 }),
+
   generarIA: (payload) => Api._post('/api/generar_ia.php', payload),
   guardarPlanificacion: (payload) => Api._post('/api/guardar_planificacion.php', payload),
   listarPlanificaciones: (docenteId) => Api._get(`/api/listar_planificaciones.php?docente_id=${docenteId}`),

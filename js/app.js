@@ -8,6 +8,7 @@ const state = {
   fecha: '',
   valor: '',
   enunciado: '',
+  codigoActividad: '',
   generado: null,        // respuesta cruda de la IA
   instrumentos: [],
   planificacionId: null,
@@ -132,6 +133,7 @@ function bindEvents() {
     state.fecha = document.getElementById('dateFecha').value;
     state.valor = document.getElementById('txtValor').value.trim();
     state.enunciado = document.getElementById('txtEnunciado').value.trim();
+    state.codigoActividad = document.getElementById('txtCodigoActividad').value.trim();
 
     if (!state.fecha) return alert('Selecciona la fecha de realización.');
     if (state.enunciado.length < 5) return alert('Escribe el enunciado/título de la actividad.');
@@ -168,6 +170,52 @@ function bindEvents() {
   });
   document.getElementById('cgSelModulo').addEventListener('change', onCambioModuloGestor);
   document.getElementById('btnAgregarContenido').addEventListener('click', agregarContenido);
+
+  // --- Logos institucionales ---
+  document.getElementById('btnLogos').addEventListener('click', abrirModalLogos);
+  document.getElementById('btnCerrarLogos').addEventListener('click', () => {
+    document.getElementById('modalLogos').classList.add('is-hidden');
+  });
+  document.getElementById('fileLogoCentro').addEventListener('change', (e) => subirLogoDesdeInput(e, 'centro'));
+  document.getElementById('fileLogoMinerd').addEventListener('change', (e) => subirLogoDesdeInput(e, 'minerd'));
+  document.getElementById('fileLogoDetp').addEventListener('change', (e) => subirLogoDesdeInput(e, 'detp'));
+}
+
+// ---------- Logos institucionales ----------
+async function abrirModalLogos() {
+  document.getElementById('modalLogos').classList.remove('is-hidden');
+  try {
+    const logos = await Api.listarLogos();
+    pintarPreviewLogo('logoPreviewCentro', logos.centro);
+    pintarPreviewLogo('logoPreviewMinerd', logos.minerd);
+    pintarPreviewLogo('logoPreviewDetp', logos.detp);
+  } catch (e) { /* silencioso */ }
+}
+
+function pintarPreviewLogo(elId, url) {
+  const el = document.getElementById(elId);
+  el.innerHTML = url ? `<img src="${url}?t=${Date.now()}" alt="logo">` : 'Sin logo';
+}
+
+function subirLogoDesdeInput(e, tipo) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const mapaPreview = { centro: 'logoPreviewCentro', minerd: 'logoPreviewMinerd', detp: 'logoPreviewDetp' };
+  const previewEl = document.getElementById(mapaPreview[tipo]);
+  previewEl.textContent = 'Subiendo…';
+
+  const reader = new FileReader();
+  reader.onload = async () => {
+    try {
+      const res = await Api.subirLogo(tipo, reader.result);
+      pintarPreviewLogo(mapaPreview[tipo], res.url);
+    } catch (err) {
+      previewEl.textContent = 'Error al subir';
+      alert('No se pudo subir el logo: ' + err.message);
+    }
+  };
+  reader.readAsDataURL(file);
 }
 
 // ---------- Gestor de contenidos ----------
@@ -352,6 +400,7 @@ async function guardarPlanificacion() {
     fecha_realizacion: state.fecha,
     valor: state.valor,
     enunciado_actividad: state.enunciado,
+    codigo_actividad: state.codigoActividad || null,
     instrumento_evaluacion_id: esOtro ? null : (selInstrumento.value || null),
     instrumento_evaluacion_otro: esOtro ? document.getElementById('txtInstrumentoOtro').value.trim() : null,
     estrategia: document.getElementById('edEstrategia').value,

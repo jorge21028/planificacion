@@ -255,6 +255,25 @@ input:disabled { background: #F3F1EC; color: var(--ink-soft); }
 }
 .contenido-item .btn-eliminar:hover { opacity: 0.7; }
 
+.logos-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.logo-slot { text-align: center; }
+.logo-preview {
+  width: 100%; height: 100px;
+  border: 1px dashed var(--line);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--ink-soft);
+  font-size: 12px;
+  margin-bottom: 10px;
+  background: var(--paper);
+  overflow: hidden;
+}
+.logo-preview img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.btn-file { display: block; text-align: center; font-size: 12.5px; cursor: pointer; }
+@media (max-width: 600px) {
+  .logos-grid { grid-template-columns: 1fr; }
+}
+
 /* ===== Responsive ===== */
 @media (max-width: 860px) {
   .layout { grid-template-columns: 1fr; padding: 18px; }

@@ -23,6 +23,7 @@
       <p class="eyebrow">Educación Técnico Profesional</p>
       <h1>Planificador de Actividad Diaria</h1>
     </div>
+    <button class="btn btn-ghost" id="btnLogos" type="button">Logos institucionales</button>
     <button class="btn btn-ghost" id="btnGestionarContenidos" type="button">Gestionar contenidos</button>
     <button class="btn btn-ghost" id="btnHistorial" type="button">Mis planificaciones</button>
   </header>
@@ -129,6 +130,12 @@
           <label for="txtEnunciado">Título / enunciado de la actividad</label>
           <textarea id="txtEnunciado" rows="3" placeholder="Ej: Diseñar un diagrama de flujo para calcular el promedio de calificaciones de un estudiante, usando estructuras condicionales."></textarea>
           <small class="field-help">Sé específico: la IA usa exactamente este texto para redactar el resto de la planificación.</small>
+        </div>
+
+        <div class="field">
+          <label for="txtCodigoActividad">Código de actividad (opcional)</label>
+          <input type="text" id="txtCodigoActividad" placeholder="Ej: Act.2.1">
+          <small class="field-help">Aparece junto a "Enunciado de la Actividad" en el documento, igual que en la plantilla oficial, y se usa en el nombre del archivo descargado.</small>
         </div>
 
         <div class="actions-row">
@@ -240,6 +247,43 @@
       </section>
 
     </main>
+  </div>
+</div>
+
+<!-- Modal logos institucionales -->
+<div class="modal-overlay is-hidden" id="modalLogos">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Logos institucionales</h3>
+      <button class="btn btn-ghost" id="btnCerrarLogos" type="button">✕</button>
+    </div>
+    <div class="modal-body">
+      <p class="hint">Se suben una sola vez y quedan registrados para todas las planificaciones (aparecen arriba del documento en Word, PDF y vista en pantalla).</p>
+
+      <div class="logos-grid">
+        <div class="logo-slot">
+          <div class="logo-preview" id="logoPreviewCentro">Sin logo</div>
+          <label class="btn btn-ghost btn-file">
+            Subir logo del Centro
+            <input type="file" accept="image/png,image/jpeg,image/webp" id="fileLogoCentro" hidden>
+          </label>
+        </div>
+        <div class="logo-slot">
+          <div class="logo-preview" id="logoPreviewMinerd">Sin logo</div>
+          <label class="btn btn-ghost btn-file">
+            Subir logo del MINERD
+            <input type="file" accept="image/png,image/jpeg,image/webp" id="fileLogoMinerd" hidden>
+          </label>
+        </div>
+        <div class="logo-slot">
+          <div class="logo-preview" id="logoPreviewDetp">Sin logo</div>
+          <label class="btn btn-ghost btn-file">
+            Subir logo del DETP
+            <input type="file" accept="image/png,image/jpeg,image/webp" id="fileLogoDetp" hidden>
+          </label>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
