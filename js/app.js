@@ -160,6 +160,140 @@ function bindEvents() {
   document.getElementById('btnCerrarHistorial').addEventListener('click', () => {
     document.getElementById('modalHistorial').classList.add('is-hidden');
   });
+
+  // --- Gestor de contenidos ---
+  document.getElementById('btnGestionarContenidos').addEventListener('click', abrirGestorContenidos);
+  document.getElementById('btnCerrarContenidos').addEventListener('click', () => {
+    document.getElementById('modalContenidos').classList.add('is-hidden');
+  });
+  document.getElementById('cgSelModulo').addEventListener('change', onCambioModuloGestor);
+  document.getElementById('btnAgregarContenido').addEventListener('click', agregarContenido);
+}
+
+// ---------- Gestor de contenidos ----------
+let cgModulos = [];
+let cgRAs = [];
+
+async function abrirGestorContenidos() {
+  const modal = document.getElementById('modalContenidos');
+  modal.classList.remove('is-hidden');
+
+  const sel = document.getElementById('cgSelModulo');
+  sel.innerHTML = '<option value="">Cargando…</option>';
+
+  try {
+    cgModulos = await Api.todosLosModulos();
+    sel.innerHTML = '<option value="">Selecciona un módulo…</option>' +
+      cgModulos.map(m => `<option value="${m.id}">${m.nombre}</option>`).join('');
+  } catch (e) {
+    sel.innerHTML = '<option value="">Error al cargar módulos</option>';
+  }
+
+  document.getElementById('cgListaContenidos').innerHTML =
+    '<p class="hint">Selecciona un módulo para ver su banco de contenidos.</p>';
+}
+
+async function onCambioModuloGestor(e) {
+  const moduloId = e.target.value;
+  const selRA = document.getElementById('cgSelRA');
+  selRA.innerHTML = '<option value="">Toda la asignatura</option>';
+
+  if (!moduloId) {
+    document.getElementById('cgListaContenidos').innerHTML =
+      '<p class="hint">Selecciona un módulo para ver su banco de contenidos.</p>';
+    return;
+  }
+
+  try {
+    cgRAs = await Api.resultadosAprendizaje(moduloId);
+    cgRAs.forEach(r => {
+      const opt = document.createElement('option');
+      opt.value = r.id;
+      opt.textContent = r.codigo;
+      selRA.appendChild(opt);
+    });
+  } catch (e) { /* silencioso */ }
+
+  await cargarListaContenidos(moduloId);
+}
+
+async function cargarListaContenidos(moduloId) {
+  const cont = document.getElementById('cgListaContenidos');
+  cont.innerHTML = '<p class="hint">Cargando…</p>';
+
+  try {
+    const items = await Api.listarContenidos(moduloId);
+    if (items.length === 0) {
+      cont.innerHTML = '<p class="hint">Este módulo todavía no tiene contenidos cargados.</p>';
+      return;
+    }
+
+    const grupos = { conceptual: [], procedimental: [], actitudinal: [] };
+    items.forEach(it => grupos[it.tipo].push(it));
+
+    const etiquetas = { conceptual: 'Conceptuales', procedimental: 'Procedimentales', actitudinal: 'Actitudinales' };
+
+    cont.innerHTML = Object.keys(etiquetas).map(tipo => {
+      if (grupos[tipo].length === 0) return '';
+      const filas = grupos[tipo].map(it => `
+        <div class="contenido-item" data-id="${it.id}">
+          <span>${it.ra_codigo ? `<span class="ra-tag">${it.ra_codigo}</span>` : ''}${escapeHtml(it.descripcion)}</span>
+          <button class="btn-eliminar" title="Eliminar" data-id="${it.id}">✕</button>
+        </div>
+      `).join('');
+      return `<div class="contenido-grupo"><h4>${etiquetas[tipo]}</h4>${filas}</div>`;
+    }).join('');
+
+    cont.querySelectorAll('.btn-eliminar').forEach(btn => {
+      btn.addEventListener('click', () => eliminarContenido(btn.dataset.id, moduloId));
+    });
+  } catch (e) {
+    cont.innerHTML = '<p class="hint">Error al cargar contenidos: ' + e.message + '</p>';
+  }
+}
+
+async function agregarContenido() {
+  const moduloId = document.getElementById('cgSelModulo').value;
+  const raId = document.getElementById('cgSelRA').value;
+  const tipo = document.getElementById('cgSelTipo').value;
+  const descripcion = document.getElementById('cgTxtDescripcion').value.trim();
+
+  if (!moduloId) return alert('Selecciona un módulo primero.');
+  if (descripcion.length < 3) return alert('Escribe la descripción del contenido.');
+
+  const btn = document.getElementById('btnAgregarContenido');
+  btn.disabled = true;
+
+  try {
+    await Api.guardarContenido({
+      asignatura_id: moduloId,
+      unidad_id: raId || null,
+      tipo,
+      descripcion,
+    });
+    document.getElementById('cgTxtDescripcion').value = '';
+    await cargarListaContenidos(moduloId);
+  } catch (e) {
+    alert('No se pudo agregar: ' + e.message);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function eliminarContenido(id, moduloId) {
+  if (!confirm('¿Eliminar este contenido del banco?')) return;
+  try {
+    await Api.eliminarContenido(id);
+    await cargarListaContenidos(moduloId);
+  } catch (e) {
+    alert('No se pudo eliminar: ' + e.message);
+  }
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
 }
 
 // ---------- Paso 3: generación IA ----------

@@ -19,8 +19,13 @@ const Api = {
 
   docentes: () => Api._get('/api/docentes.php'),
   modulosPorDocente: (docenteId) => Api._get(`/api/modulos.php?docente_id=${docenteId}`),
+  todosLosModulos: () => Api._get('/api/modulos.php'),
   resultadosAprendizaje: (moduloId) => Api._get(`/api/resultados_aprendizaje.php?modulo_id=${moduloId}`),
   instrumentosEvaluacion: () => Api._get('/api/instrumentos_evaluacion.php'),
+
+  listarContenidos: (asignaturaId) => Api._get(`/api/contenidos_listar.php?asignatura_id=${asignaturaId}`),
+  guardarContenido: (payload) => Api._post('/api/contenidos_guardar.php', payload),
+  eliminarContenido: (id) => Api._post('/api/contenidos_eliminar.php', { id }),
 
   generarIA: (payload) => Api._post('/api/generar_ia.php', payload),
   guardarPlanificacion: (payload) => Api._post('/api/guardar_planificacion.php', payload),

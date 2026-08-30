@@ -23,6 +23,7 @@
       <p class="eyebrow">Educación Técnico Profesional</p>
       <h1>Planificador de Actividad Diaria</h1>
     </div>
+    <button class="btn btn-ghost" id="btnGestionarContenidos" type="button">Gestionar contenidos</button>
     <button class="btn btn-ghost" id="btnHistorial" type="button">Mis planificaciones</button>
   </header>
 
@@ -239,6 +240,57 @@
       </section>
 
     </main>
+  </div>
+</div>
+
+<!-- Modal gestor de contenidos -->
+<div class="modal-overlay is-hidden" id="modalContenidos">
+  <div class="modal modal-wide">
+    <div class="modal-header">
+      <h3>Gestionar contenidos del módulo</h3>
+      <button class="btn btn-ghost" id="btnCerrarContenidos" type="button">✕</button>
+    </div>
+    <div class="modal-body">
+      <p class="hint">Este es el banco de contenidos del que la IA selecciona y redacta al generar cada planificación. Mientras más completo, mejores resultados.</p>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="cgSelModulo">Módulo Formativo</label>
+          <select id="cgSelModulo"><option value="">Cargando…</option></select>
+        </div>
+        <div class="field">
+          <label for="cgSelRA">Aplica a (opcional)</label>
+          <select id="cgSelRA">
+            <option value="">Toda la asignatura</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="cgSelTipo">Tipo</label>
+          <select id="cgSelTipo">
+            <option value="conceptual">Conceptual</option>
+            <option value="procedimental">Procedimental</option>
+            <option value="actitudinal">Actitudinal</option>
+          </select>
+        </div>
+        <div class="field" style="align-self:flex-end;">
+          <button class="btn btn-primary" id="btnAgregarContenido" type="button" style="width:100%;">+ Agregar</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="cgTxtDescripcion">Descripción del contenido</label>
+        <textarea id="cgTxtDescripcion" rows="2" placeholder="Ej: Estructuras de control condicionales (if/else, switch)"></textarea>
+      </div>
+
+      <hr class="divider">
+
+      <div id="cgListaContenidos">
+        <p class="hint">Selecciona un módulo para ver su banco de contenidos.</p>
+      </div>
+    </div>
   </div>
 </div>
 
